@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid RAG Assistant | AI-Powered Q&A</title>
+    <meta name="description" content="A powerful RAG application for intelligent document and web-augmented search.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --primary: #000000;
+            --secondary: #666666;
+            --bg: #ffffff;
+            --surface: #fcfcfc;
+            --border: #f0f0f0;
+            --text: #111111;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        nav {
+            padding: 2.5rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--primary);
+        }
+
+        .hero {
+            padding: 6rem 0 3rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            max-width: 650px;
+            margin: 0 auto 3rem;
+            font-weight: 400;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        section {
+            padding: 4rem 0;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            border-color: #ddd;
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: var(--secondary);
+        }
+
+        .feature-icon {
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            color: var(--primary);
+        }
+
+        .formats-bar {
+            background: var(--surface);
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+
+        .format-item {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .how-it-works {
+            background: #fafafa;
+            border-radius: 16px;
+            padding: 4rem;
+            margin: 4rem 0;
+        }
+
+        .step {
+            margin-bottom: 3rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .step-num {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--secondary);
+            opacity: 0.5;
+        }
+
+        .step-content h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .step-content p {
+            color: var(--secondary);
+            font-size: 1rem;
+        }
+
+        footer {
+            padding: 4rem 0 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1.1rem; }
+            .how-it-works { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="#" class="logo">
+                <i class="fa-solid fa-square"></i>
+                <span>Hybrid RAG</span>
+            </a>
+        </nav>
+
+        <main>
+            <section class="hero">
+                <h1>Bridging Document Insights with Web Knowledge.</h1>
+                <p>A sophisticated Retrieval-Augmented Generation (RAG) assistant built for precision, performance, and transparency.</p>
+                <a href="https://hybrid-rag-assistant.streamlit.app/" class="btn-primary" target="_blank">
+                    Launch Application
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+
+                <div class="formats-bar">
+                    <span class="format-item"><i class="fa-regular fa-file-pdf"></i> PDF</span>
+                    <span class="format-item"><i class="fa-regular fa-file-word"></i> DOCX</span>
+                    <span class="format-item"><i class="fa-regular fa-file-excel"></i> CSV</span>
+                    <span class="format-item"><i class="fa-regular fa-file-code"></i> HTML/TXT</span>
+                </div>
+            </section>
+
+            <section>
+                <span class="section-label">Core Capabilities</span>
+                <div class="grid-3">
+                    <div class="feature-card">
+                        <i class="fa-solid fa-layer-group feature-icon"></i>
+                        <h3>Hybrid Retrieval</h3>
+                        <p>Combines keyword precision (BM25) with semantic depth (FAISS) for 2x more accurate context retrieval.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fa-solid fa-cloud-bolt feature-icon"></i>
+                        <h3>Augmented Web Search</h3>
+                        <p>Fills knowledge gaps with live information from the web when your local corpus isn't enough.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fa-solid fa-file-shield feature-icon"></i>
+                        <h3>Source Verification</h3>
+                        <p>Every response includes direct citations from your documents or web search results.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="how-it-works">
+                <span class="section-label">How It Works</span>
+                
+                <div class="step">
+                    <div class="step-num">01</div>
+                    <div class="step-content">
+                        <h3>Ingest & Parse</h3>
+                        <p>Upload your document library—PDF, TXT, or DOCX. The engine extracts clean text and maintains formatting integrity.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-num">02</div>
+                    <div class="step-content">
+                        <h3>Hybrid Indexing</h3>
+                        <p>Documents are vectorized for deep semantic understanding and indexed for lightning-fast keyword lookup.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-num">03</div>
+                    <div class="step-content">
+                        <h3>Query & Synthesize</h3>
+                        <p>The system retrieves the best snippets from both its local store and the live web, synthesizing a concise, referenced answer via Gemini.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Hybrid RAG Assistant. Built with Streamlit and Google Gemini.</p>
+        </footer>
+    </div>
+</body>
+</html>
