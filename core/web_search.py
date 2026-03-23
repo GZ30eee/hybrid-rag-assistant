@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import os
 import httpx
 import numpy as np
 from bs4 import BeautifulSoup
@@ -14,7 +13,7 @@ from core.hybrid_retriever import (
 # --- Web Search Providers ---
 def search_serpapi(query, num_results=5):
     """Performs a web search using SerpAPI."""
-    api_key = os.getenv("WEB_SEARCH_API_KEY")
+    api_key = st.secrets.get("WEB_SEARCH_API_KEY")
     if not api_key:
         return []
         
@@ -77,7 +76,7 @@ def perform_web_search(query, k):
     Performs a web search, fetches and processes the top results,
     then retrieves the most relevant snippets.
     """
-    web_provider = os.getenv("WEB_SEARCH_PROVIDER", "serpapi")
+    web_provider = st.secrets.get("WEB_SEARCH_PROVIDER", "serpapi")
     
     if web_provider == "serpapi":
         search_results = search_serpapi(query, num_results=10)

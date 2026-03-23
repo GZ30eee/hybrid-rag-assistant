@@ -1,11 +1,10 @@
 import streamlit as st
 import google.generativeai as genai
-import os
 import re
 
 def configure_gemini():
     """Configures the Gemini API if the key is present."""
-    gemini_api_key = os.getenv("GEMINI_API_KEY")
+    gemini_api_key = st.secrets.get("GEMINI_API_KEY")
     if not gemini_api_key:
         st.error("GEMINI_API_KEY is not set in environment variables.")
         return None

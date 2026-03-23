@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 import time
 from core import (
     document_parser,
@@ -8,11 +7,6 @@ from core import (
     session_manager,
     web_search,
 )
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
 # --- Page Configuration ---
 st.set_page_config(
     page_title="RAG-Based Q&A",
@@ -179,7 +173,7 @@ if query:
 
         web_results = []
         if st.session_state.mode in ["Web", "Hybrid"]:
-            if os.getenv("WEB_SEARCH_API_KEY"):
+            if st.secrets.get("WEB_SEARCH_API_KEY"):
                 web_results = web_search.perform_web_search(
                     query, st.session_state.top_k_web
                 )
