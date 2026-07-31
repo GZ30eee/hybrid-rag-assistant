@@ -1,0 +1,34 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest pytest-cov ruff mypy black
+    - name: Lint with ruff
+      run: ruff check .
+    - name: Format check with black
+      run: black --check .
+    - name: Type check with mypy
+      run: mypy core/ --ignore-missing-imports
+    - name: Test with pytest
+      run: pytest tests/ --cov=core/ --cov-report=xml
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
