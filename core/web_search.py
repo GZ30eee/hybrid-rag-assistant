@@ -4,17 +4,18 @@ import httpx
 import numpy as np
 from bs4 import BeautifulSoup
 from readability import Document
-from core.hybrid_retriever import (
-    get_sentence_transformer,
-    SearchResult,
-    chunk_text,
-)
+from core.hybrid_retriever import get_sentence_transformer, SearchResult, chunk_text
+import logging
+import functools
+
+logger = logging.getLogger(__name__)
 
 # --- Web Search Providers ---
-def search_serpapi(query, num_results=5):
+def search_serpapi(query: str, num_results: int = 5):
     """Performs a web search using SerpAPI."""
     api_key = st.secrets.get("WEB_SEARCH_API_KEY")
     if not api_key:
+        logger.warning("WEB_SEARCH_API_KEY not set.")
         return []
         
     url = "https://serpapi.com/search"
@@ -26,7 +27,7 @@ def search_serpapi(query, num_results=5):
     }
     
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
         
@@ -39,24 +40,20 @@ def search_serpapi(query, num_results=5):
             })
         return results
     except requests.RequestException as e:
+        logger.error(f"SerpAPI search failed: {e}")
         st.error(f"SerpAPI search failed: {e}")
         return []
 
 # --- Content Extraction & Retrieval ---
-# In core/web_search.py
-
-def fetch_and_parse_url(url):
-    """Fetches a URL and extracts the main content."""
-    # Add a headers dictionary with a user-agent
+@functools.lru_cache(maxsize=128)
+def fetch_and_parse_url(url: str):
+    """Fetches a URL and extracts the main content (with caching)."""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     
     try:
-        with httpx.Client(
-            timeout=30, follow_redirects=True
-        ) as client:
-            # Pass the headers to the get request
+        with httpx.Client(timeout=30, follow_redirects=True) as client:
             res = client.get(url, headers=headers)
             res.raise_for_status()
             
@@ -68,10 +65,10 @@ def fetch_and_parse_url(url):
             
             return title, text
     except (httpx.RequestError, httpx.HTTPStatusError) as e:
-        st.warning(f"Failed to fetch or parse {url}: {e}")
+        logger.warning(f"Failed to fetch or parse {url}: {e}")
         return None, None
 
-def perform_web_search(query, k):
+def perform_web_search(query: str, k: int) -> List[SearchResult]:
     """
     Performs a web search, fetches and processes the top results,
     then retrieves the most relevant snippets.
@@ -93,7 +90,6 @@ def perform_web_search(query, k):
         for res in search_results:
             title, content = fetch_and_parse_url(res["link"])
             if content:
-                # Chunking with metadata
                 chunks = chunk_text(content, f"WEB: {title}")
                 for chunk in chunks:
                     chunk["metadata"]["type"] = "web"
@@ -107,11 +103,8 @@ def perform_web_search(query, k):
     model = get_sentence_transformer()
     query_embedding = model.encode(query)
     
-    chunk_embeddings = model.encode(
-        [c["text"] for c in web_chunks]
-    )
+    chunk_embeddings = model.encode([c["text"] for c in web_chunks])
     
-    # Calculate cosine similarity
     similarity_scores = np.dot(
         chunk_embeddings, query_embedding
     ) / (
@@ -119,7 +112,6 @@ def perform_web_search(query, k):
         * np.linalg.norm(query_embedding)
     )
 
-    # Combine scores with chunks and sort
     scored_chunks = sorted(
         zip(web_chunks, similarity_scores),
         key=lambda x: x[1],
@@ -128,7 +120,6 @@ def perform_web_search(query, k):
     
     top_k_results = scored_chunks[:k]
     
-    # Create SearchResult objects for consistent output
     final_results = [
         SearchResult(
             text=chunk["text"],
