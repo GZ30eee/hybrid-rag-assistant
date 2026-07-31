@@ -1,5 +1,8 @@
 import streamlit as st
 import time
+import logging
+from typing import List, Dict, Any
+
 from core import (
     document_parser,
     hybrid_retriever,
@@ -7,6 +10,12 @@ from core import (
     session_manager,
     web_search,
 )
+from core.hybrid_retriever import SearchResult
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # --- Page Configuration ---
 st.set_page_config(
     page_title="RAG-Based Q&A",
@@ -19,7 +28,7 @@ st.set_page_config(
 session_manager.initialize_session()
 
 # --- Utility Functions ---
-def display_results(results, mode):
+def display_results(results: List[SearchResult], mode: str) -> None:
     """Displays the retrieved snippets in the main UI."""
     if not results:
         st.info("No relevant results found. Please try a different query.")
@@ -32,25 +41,21 @@ def display_results(results, mode):
 
         col1, col2 = st.columns([0.9, 0.1])
         with col1:
-            # Highlight query terms
             snippet_text = res.text
             for term in st.session_state.query.split():
                 snippet_text = snippet_text.replace(
                     term, f"<mark>**{term}**</mark>"
                 )
 
-            # Display with markdown
             with st.expander(
                 f"**{source}** ({score:.2f}%)",
                 expanded=False,
             ):
                 st.markdown(snippet_text, unsafe_allow_html=True)
-                
                 if res.metadata.get("type") == "web":
                     st.markdown(
                         f"**Source URL**: [{res.metadata.get('url')}]({res.metadata.get('url')})"
                     )
-
         with col2:
             st.button(
                 "📋",
@@ -58,20 +63,18 @@ def display_results(results, mode):
                 help="Copy to clipboard",
                 on_click=lambda text=res.text: st.code(text, language="text"),
             )
-            # st.button("📌", key=f"pin_{mode}_{i}", help="Pin this item")
-            # Currently just a placeholder, full pin logic would be more complex
 
-def clear_session():
+def clear_session() -> None:
     """Clears all session state variables."""
     session_manager.clear_session()
     st.success("Session cleared. All documents and indexes have been removed.")
     st.rerun()
 
-# --- UI Layout ---
+# --- Main UI ---
 st.title("RAG-Based Document + Web Q&A 🤖")
 st.markdown("Ask questions about your documents or the web!")
 
-# --- Sidebar for Settings and Document Management ---
+# --- Sidebar ---
 with st.sidebar:
     st.header("⚙️ App Settings & Data")
     
@@ -91,7 +94,6 @@ with st.sidebar:
                         parsed_docs.append(
                             {"content": doc_text, "filename": uploaded_file.name}
                         )
-                
                 if parsed_docs:
                     st.session_state.corpus = parsed_docs
                     hybrid_retriever.create_document_index(st.session_state.corpus)
@@ -99,7 +101,7 @@ with st.sidebar:
                     st.success(f"{len(parsed_docs)} docs processed and indexed!")
                 else:
                     st.error("No documents could be parsed.")
-                    st.session_state.doc_retriever = None
+                    st.session_state.doc_retriever = False
 
         if st.session_state.corpus:
             st.write(f"**Total files:** {len(st.session_state.corpus)}")
@@ -111,7 +113,7 @@ with st.sidebar:
                 with col2:
                     if st.button("❌", key=f"remove_doc_{i}"):
                         st.session_state.corpus.pop(i)
-                        st.session_state.doc_retriever = None
+                        st.session_state.doc_retriever = False
                         st.success("Removed! Re-upload to re-index.")
                         st.rerun()
 
@@ -140,18 +142,17 @@ with st.sidebar:
             st.session_state.selected_docs = st.multiselect("Filter by Source File", options, default=st.session_state.selected_docs)
 
     with st.expander("🤖 LLM Settings", expanded=False):
-        st.session_state.llm_temperature = st.slider("Temperature", 0.0, 1.0, st.session_state.llm_temperature, 0.1, help="Higher = more creative/random")
+        st.session_state.llm_temperature = st.slider("Temperature", 0.0, 1.0, st.session_state.llm_temperature, 0.1)
         st.session_state.llm_max_tokens = st.slider("Max Output Tokens", 256, 4096, st.session_state.llm_max_tokens, 256)
         st.session_state.system_prompt = st.text_area("System Prompt Template", value=st.session_state.system_prompt, height=100)
 
     st.divider()
     if st.button("🗑️ Clear All Data", type="primary", use_container_width=True):
         clear_session()
-        
-# --- Main Content Area for Q&A ---
+
+# --- Main Content ---
 query = st.chat_input("Ask a question...")
 
-# FIX: This conditional is now based on doc_retriever
 if not st.session_state.get("doc_retriever"):
     st.info("No documents indexed. Please upload files.")
 
@@ -160,7 +161,6 @@ if query:
     start_time = time.time()
     st.session_state.history.append({"query": query, "answer": None, "mode": st.session_state.mode})
 
-    # --- Retrieval Logic ---
     with st.spinner("Searching for answers..."):
         retrieved_docs = []
         if st.session_state.mode in ["Document", "Hybrid"]:
@@ -178,9 +178,7 @@ if query:
                     query, st.session_state.top_k_web
                 )
             else:
-                st.warning(
-                    "Web Search API key not configured. Cannot perform web search."
-                )
+                st.warning("Web Search API key not configured.")
 
         combined_results = []
         if st.session_state.mode == "Hybrid":
@@ -195,7 +193,6 @@ if query:
         elif st.session_state.mode == "Web":
             combined_results = web_results
 
-        # --- LLM Generation ---
         if combined_results:
             context = "\n\n".join([res.text for res in combined_results])
             
@@ -210,28 +207,22 @@ if query:
                 context,
                 answer_type,
                 combined_results,
-                chat_history=st.session_state.history[:-1] # pass history excluding current incomplete turn
+                chat_history=st.session_state.history[:-1]
             )
             
             st.session_state.history[-1]["answer"] = llm_response
             st.session_state.history[-1]["context"] = combined_results
 
-            # --- Display LLM Answer ---
+            # Display Answer
             st.header("Answer")
-            
-            # Short bulleted answer with citations
             st.subheader("Concise Answer")
             st.markdown(llm_response["short"], unsafe_allow_html=True)
-            
             st.subheader("Web-Ready Paragraph")
             st.write(llm_response["web_ready"])
-            
-            # Display Sources
             st.subheader("Sources")
             for source in llm_response["sources"]:
                 st.write(source)
                 
-            # Download Response Button
             download_content = f"Question: {query}\n\nConcise Answer:\n{llm_response['short']}\n\nWeb-Ready Paragraph:\n{llm_response['web_ready']}\n\nSources:\n" + "\n".join(llm_response["sources"])
             st.download_button(
                 label="📥 Download Answer",
@@ -239,7 +230,6 @@ if query:
                 file_name="rag_response.txt",
                 mime="text/plain",
             )
-
         else:
             st.warning("Could not find relevant information to answer the question.")
     
@@ -247,10 +237,9 @@ if query:
     retrieval_time = end_time - start_time
     st.session_state.history[-1]["time"] = retrieval_time
     
-    # --- Display Snippets ---
     display_results(combined_results, st.session_state.mode)
 
-# --- Right-side History Panel ---
+# --- History Panel in Sidebar ---
 with st.sidebar:
     st.header("Query History")
     if st.session_state.history:
