@@ -7,13 +7,16 @@ import pickle
 import os
 import itertools
 from collections import namedtuple
+from typing import List, Dict, Any, Optional
+import logging
 
-# Named tuple for consistent result object
+logger = logging.getLogger(__name__)
+
 SearchResult = namedtuple("SearchResult", ["text", "metadata", "score"])
 
 # --- Model & Index Initialization ---
 @st.cache_resource
-def get_sentence_transformer(model_name="all-MiniLM-L6-v2"):
+def get_sentence_transformer(model_name: str = "all-MiniLM-L6-v2"):
     """Load the Sentence-Transformer model."""
     return SentenceTransformer(model_name)
 
@@ -21,7 +24,7 @@ def get_current_model():
     model_name = st.session_state.get("embedding_model", "all-MiniLM-L6-v2")
     return get_sentence_transformer(model_name)
 
-def chunk_text(text, filename, chunk_size=500, chunk_overlap=100):
+def chunk_text(text: str, filename: str, chunk_size: int = 500, chunk_overlap: int = 100) -> List[Dict[str, Any]]:
     """Chunks text into smaller pieces with metadata."""
     chunks = []
     tokens = text.split()
@@ -41,7 +44,7 @@ def chunk_text(text, filename, chunk_size=500, chunk_overlap=100):
         })
     return chunks
 
-def create_document_index(corpus):
+def create_document_index(corpus: List[Dict[str, str]]) -> None:
     """
     Chunks documents and creates BM25 and FAISS indexes.
     Stores them in Streamlit's session state.
@@ -51,13 +54,13 @@ def create_document_index(corpus):
     chunk_size = st.session_state.get("chunk_size", 500)
     chunk_overlap = st.session_state.get("chunk_overlap", 100)
     
-    # Chunking and preparing data for indexing
     for doc in corpus:
         st.session_state.doc_chunks.extend(
             chunk_text(doc["content"], doc["filename"], chunk_size, chunk_overlap)
         )
 
     if not st.session_state.doc_chunks:
+        logger.warning("No chunks created from corpus.")
         return
 
     # BM25 Index
@@ -72,13 +75,13 @@ def create_document_index(corpus):
     
     st.session_state.faiss_index = faiss.IndexFlatIP(d)
     st.session_state.faiss_index.add(np.array(corpus_embeddings))
+    logger.info(f"Indexed {len(st.session_state.doc_chunks)} chunks.")
 
-def retrieve_documents(query, k):
+def retrieve_documents(query: str, k: int) -> List[SearchResult]:
     """Performs hybrid retrieval on document corpus with metadata filtering."""
     if not st.session_state.doc_chunks:
         return []
         
-    # Metadata filtering setup
     selected_docs = st.session_state.get("selected_docs", [])
     valid_indices = set(range(len(st.session_state.doc_chunks)))
     if selected_docs:
@@ -90,7 +93,6 @@ def retrieve_documents(query, k):
     # Dense Retrieval (FAISS)
     model = get_current_model()
     query_embedding = model.encode(query)
-    # Search deeper to allow for filtering dropping results
     D, I = st.session_state.faiss_index.search(
         np.array([query_embedding]), max(k * 5, len(st.session_state.doc_chunks))
     )
@@ -118,11 +120,12 @@ def retrieve_documents(query, k):
         r["norm_score"] = (r["score"] - min_sparse) / (max_sparse - min_sparse) if max_sparse != min_sparse else 0
 
     # Combine & re-rank (default alpha=0.5)
+    alpha = st.session_state.get("alpha", 0.5)
     combined_scores = {}
     for r in dense_results:
-        combined_scores[r["chunk_idx"]] = combined_scores.get(r["chunk_idx"], 0) + (1 - st.session_state.alpha) * r["norm_score"]
+        combined_scores[r["chunk_idx"]] = combined_scores.get(r["chunk_idx"], 0) + (1 - alpha) * r["norm_score"]
     for r in sparse_results:
-        combined_scores[r["chunk_idx"]] = combined_scores.get(r["chunk_idx"], 0) + st.session_state.alpha * r["norm_score"]
+        combined_scores[r["chunk_idx"]] = combined_scores.get(r["chunk_idx"], 0) + alpha * r["norm_score"]
 
     sorted_indices = sorted(
         combined_scores, key=combined_scores.get, reverse=True
@@ -135,19 +138,18 @@ def retrieve_documents(query, k):
             SearchResult(
                 text=chunk["text"],
                 metadata=chunk["metadata"],
-                score=combined_scores[idx] / 2, # Normalize combined score to 0-1 range
+                score=combined_scores[idx] / 2,  # Normalize combined score to 0-1 range
             )
         )
     return final_results
 
-def combine_results(doc_results, web_results, alpha):
+def combine_results(doc_results: List[SearchResult], web_results: List[SearchResult], alpha: float) -> List[SearchResult]:
     """Combines and re-ranks document and web results."""
     all_results = doc_results + web_results
 
     if not all_results:
         return []
 
-    # Normalize scores from 0 to 1
     max_score = max(r.score for r in all_results) if all_results else 1
     normalized_results = [
         SearchResult(
@@ -158,7 +160,6 @@ def combine_results(doc_results, web_results, alpha):
         for r in all_results
     ]
 
-    # Sort by normalized score and deduplicate
     normalized_results.sort(key=lambda x: x.score, reverse=True)
     
     # Simple deduplication based on text content
