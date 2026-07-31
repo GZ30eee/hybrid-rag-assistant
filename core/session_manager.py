@@ -9,7 +9,7 @@ def initialize_session():
     if "faiss_index" not in st.session_state:
         st.session_state.faiss_index = None
     if "doc_retriever" not in st.session_state:
-        st.session_state.doc_retriever = None
+        st.session_state.doc_retriever = False
     if "doc_chunks" not in st.session_state:
         st.session_state.doc_chunks = []
     if "history" not in st.session_state:
@@ -18,7 +18,7 @@ def initialize_session():
         st.session_state.alpha = 0.5
     if "query" not in st.session_state:
         st.session_state.query = ""
-    # New Settings variables
+    # Settings
     if "chunk_size" not in st.session_state:
         st.session_state.chunk_size = 500
     if "chunk_overlap" not in st.session_state:
@@ -32,14 +32,18 @@ def initialize_session():
     if "system_prompt" not in st.session_state:
         st.session_state.system_prompt = "You are a helpful and expert Q&A assistant."
     if "selected_docs" not in st.session_state:
-        st.session_state.selected_docs = [] # Metadata filter
+        st.session_state.selected_docs = []
+    # New: vector store type
+    if "vector_store_type" not in st.session_state:
+        st.session_state.vector_store_type = "faiss"  # or "qdrant"
 
 def clear_session():
     """Clears all state variables except basic config."""
     persistent_keys = [
         "alpha", "top_k_doc", "top_k_web", "mode", "chunk_size", 
         "chunk_overlap", "embedding_model", "llm_temperature", 
-        "llm_max_tokens", "system_prompt", "selected_docs"
+        "llm_max_tokens", "system_prompt", "selected_docs",
+        "vector_store_type"
     ]
     for key in list(st.session_state.keys()):
         if key not in persistent_keys:
