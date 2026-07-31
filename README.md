@@ -1,73 +1,80 @@
 # 🤖 Hybrid RAG Assistant: Document + Web Q&A
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://github.com/GZ30eee/hybrid-rag-assistant)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app.streamlit.app) <!-- Replace with actual deployment URL -->
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![CI](https://github.com/GZ30eee/hybrid-rag-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/GZ30eee/hybrid-rag-assistant/actions)
 
-A powerful, production-ready Retrieval-Augmented Generation (RAG) application built with Streamlit. This assistant enables users to perform intelligent Q&A over their own document corpus AND live web search results using a state-of-the-art hybrid retrieval strategy.
+## 🏗️ Tech Stack
 
----
+| Component | Technology |
+|-----------|------------|
+| **LLM** | Google Gemini (with fallback support) |
+| **Vector Database** | FAISS (v1) + Qdrant (optional, via abstraction) |
+| **Search Engine** | BM25 (sparse) + Semantic (dense) Hybrid |
+| **Orchestration** | LangChain (implicit) + LangGraph (planned) |
+| **Frontend** | Streamlit |
+| **Evaluation** | RAGAS |
+| **Deployment** | Docker + Streamlit Cloud + GitHub Actions |
 
 ## ✨ Key Features
 
-- 📄 **Multi-Format Document Support**: Seamlessly upload and index PDF, DOCX, TXT, HTML, and CSV files.
-- 🔍 **Hybrid Retrieval Engine**: Combines the precision of **BM25 (Sparse/Keyword Search)** with the semantic depth of **FAISS (Dense/Vector Search)**.
-- 🌐 **Live Web Search Integration**: Real-time integration with web search APIs to augment local knowledge with the latest information from the internet.
-- 🤖 **LLM-Powered Intelligence**: Uses Google Gemini (or fallbacks) to generate concise, citable answers and "web-ready" summary paragraphs.
-- ⚙️ **Advanced Configuration**: Fine-tune your RAG pipeline with adjustable parameters:
-    - **Hybrid Alpha**: Balance between keyword and semantic search.
-    - **Chunking Strategy**: Customize chunk size and overlap for optimal context.
-    - **Model Selection**: Choose from various Sentence-Transformer embedding models.
-- 💾 **Session & History Management**: Interactive sidebar for document management and a persistent query history with export capabilities.
-- 🎨 **Modern UI/UX**: Clean, responsive Streamlit interface with syntax highlighting, citation tracking, and interactive snippet previews.
+- 📄 **Multi-Format Document Support**: PDF, DOCX, TXT, HTML, CSV.
+- 🔍 **Hybrid Retrieval**: Combines BM25 keyword search with FAISS dense retrieval.
+- 🌐 **Live Web Search**: Integrates with SerpAPI to augment local knowledge.
+- 🤖 **LLM-Powered Answers**: Uses Gemini to generate concise, citable answers and "web‑ready" paragraphs.
+- ⚙️ **Advanced Configuration**: Adjustable alpha, chunking, embedding models, and LLM parameters.
+- 💾 **Session & History**: Persistent query history with export.
+- 🎨 **Modern UI**: Clean, responsive Streamlit interface.
 
 ---
 
-## 🏗️ Technical Architecture
+## 🏗️ Architecture Overview
 
-The application follows a modular architecture designed for extensibility:
-
-### 1. Document Processing (`core/document_parser.py`)
-Uses robust libraries like `PyMuPDF`, `python-docx`, and `BeautifulSoup4` to extract clean text from various file formats.
-
-### 2. Hybrid Retriever (`core/hybrid_retriever.py`)
-- **Indexing**: Documents are chunked and indexed dual-path via `rank-bm25` and `faiss-cpu`.
-- **Search**: Implements a weighted scoring system ($Score = \alpha \cdot BM25 + (1-\alpha) \cdot Vector$) to provide the most relevant context snippets.
-
-### 3. LLM Interface (`core/llm_interface.py`)
-Handles prompt engineering and communication with the Gemini API, ensuring structured outputs with citations and different formats (bullets vs. paragraphs).
+```mermaid
+graph TD
+    User[User] --> App[Streamlit App]
+    App --> Upload[Upload Documents]
+    Upload --> Parser[Document Parser]
+    Parser --> Chunker[Chunking]
+    Chunker --> BM25[BM25 Index]
+    Chunker --> FAISS[FAISS Index] --> Retriever[Hybrid Retriever]
+    App --> Query[Query Input]
+    Query --> Retriever
+    Retriever --> WebSearch[Web Search] --> Retriever
+    Retriever --> LLM[LLM Interface]
+    LLM --> Response[Answer + Citations]
+    Response --> App
+```
 
 ---
 
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.8+
 - [Google Gemini API Key](https://aistudio.google.com/app/apikey)
-- (Optional) Web Search API Key (SerpAPI or similar)
+- (Optional) [SerpAPI Key](https://serpapi.com/) for web search
 
-### Step 1: Clone the repository
+### Step 1: Clone
 ```bash
 git clone https://github.com/GZ30eee/hybrid-rag-assistant.git
 cd hybrid-rag-assistant
 ```
 
-### Step 2: Install dependencies
+### Step 2: Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 3: Configure Environment Variables
-Create a `.env` file in the root directory:
-```env
-# Required for LLM
-GOOGLE_API_KEY=your_gemini_api_key_here
-
-# Optional for Web Search
-WEB_SEARCH_API_KEY=your_web_search_api_key_here
+### Step 3: Configure Secrets
+Create a `.streamlit/secrets.toml` file (or set environment variables):
+```toml
+GEMINI_API_KEY = "your_gemini_key"
+WEB_SEARCH_API_KEY = "your_serpapi_key"  # optional
 ```
 
-### Step 4: Run the Application
+### Step 4: Run
 ```bash
 streamlit run app.py
 ```
@@ -76,32 +83,55 @@ streamlit run app.py
 
 ## 📂 Project Structure
 
-```text
+```
 hybrid-rag-assistant/
-├── app.py                # Main Streamlit application entry point
-├── core/                 # Core logic modules
-│   ├── document_parser.py # File parsing and text extraction
-│   ├── hybrid_retriever.py# BM25 + FAISS retrieval logic
-│   ├── llm_interface.py   # LLM prompt and API handling
-│   ├── session_manager.py # Streamlit session state management
-│   └── web_search.py      # Web search API integration
-├── assets/               # UI assets (icons, images)
-├── tests/                # Unit and integration tests
-├── .gitignore            # Git exclusion rules
-├── requirements.txt      # Python dependencies
-└── README.md             # Project documentation
+├── app.py
+├── core/
+│   ├── document_parser.py
+│   ├── hybrid_retriever.py
+│   ├── llm_interface.py
+│   ├── session_manager.py
+│   ├── vector_store.py       # NEW: abstract vector store + Qdrant
+│   └── web_search.py
+├── evaluation/               # NEW: RAGAS harness
+│   ├── ragas_eval.py
+│   └── test_data/
+│       └── sample_qa.json
+├── benchmarks/               # NEW: performance benchmarks
+│   └── benchmark.py
+├── docs/
+│   └── architecture.mermaid  # NEW: diagram source
+├── tests/                    # (expand with unit tests)
+├── .github/workflows/ci.yml  # NEW: CI/CD
+├── Dockerfile                # NEW
+├── .dockerignore             # NEW
+├── .pre-commit-config.yaml   # NEW
+├── pyproject.toml            # NEW
+├── requirements.txt
+├── .gitignore
+├── LICENSE                   # NEW
+├── CONTRIBUTING.md           # NEW
+└── CODE_OF_CONDUCT.md        # NEW
 ```
 
 ---
 
-## 🗺️ Roadmap
-- [ ] Support for OCR (Optical Character Recognition) in PDFs.
-- [ ] Integration with more Vector DBs (Chroma, Pinecone).
-- [ ] Multi-user authentication and database persistence.
-- [ ] Support for local LLMs via Ollama.
+## 🗺️ Future Work
+
+While functional, this is a **v1 prototype**. I am currently implementing:
+
+- **RAGAS Evaluation Harness** – to measure retrieval accuracy, context relevancy, and faithfulness.
+- **Vector DB Migration** – integrating Qdrant (or pgvector) for production‑scale indexing.
+- **LangGraph Orchestration** – for multi‑step reasoning and tool usage.
+- **OCR Enhancement** – better support for scanned PDFs.
+- **Multi‑User Persistence** – database backend for session history.
+
+---
 
 ## 🤝 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request or open an Issue.
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file.
