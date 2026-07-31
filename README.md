@@ -1,4 +1,4 @@
-# 🤖 Hybrid RAG Assistant: Document + Web Q&A
+# Hybrid RAG Assistant: Document + Web Q&A
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app.streamlit.app) <!-- Replace with actual deployment URL -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
