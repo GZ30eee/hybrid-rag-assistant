@@ -3,21 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hybrid RAG Assistant | AI-Powered Q&A</title>
-    <meta name="description" content="A powerful RAG application for intelligent document and web-augmented search.">
+    <title>Hybrid RAG Assistant | AI-Powered Document & Web Q&A</title>
+    <meta name="description" content="A production-ready hybrid Retrieval-Augmented Generation (RAG) system combining BM25 keyword search with FAISS semantic search over documents and live web results.">
+    <meta property="og:title" content="Hybrid RAG Assistant">
+    <meta property="og:description" content="Intelligent Q&A across PDFs, DOCX, TXT, HTML, CSV with live web search integration.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
     <style>
         :root {
             --primary: #000000;
+            --primary-light: #1a1a1a;
             --secondary: #666666;
+            --secondary-light: #999999;
             --bg: #ffffff;
-            --surface: #fcfcfc;
-            --border: #f0f0f0;
+            --surface: #fafafa;
+            --border: #e8e8e8;
             --text: #111111;
-            --transition: all 0.2s ease-in-out;
+            --accent: #2563eb;
+            --accent-light: #3b82f6;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -35,21 +45,23 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 0 1.5rem;
         }
 
+        /* Navigation */
         nav {
-            padding: 2.5rem 0;
+            padding: 2rem 0 1.5rem;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid var(--border);
         }
 
         .logo {
-            font-weight: 700;
-            font-size: 1.1rem;
+            font-weight: 800;
+            font-size: 1.2rem;
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
@@ -58,26 +70,95 @@
             color: var(--primary);
         }
 
+        .logo i {
+            font-size: 1.4rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-cta {
+            background: var(--primary);
+            color: white !important;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .nav-cta:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
         .hero {
-            padding: 6rem 0 3rem;
+            padding: 5rem 0 3rem;
             text-align: center;
         }
 
+        .hero-badge {
+            display: inline-block;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+            letter-spacing: 0.02em;
+        }
+
+        .hero-badge i {
+            color: var(--accent);
+            margin-right: 0.5rem;
+        }
+
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
+            font-size: 4rem;
+            font-weight: 800;
             letter-spacing: -0.03em;
             margin-bottom: 1.5rem;
             color: var(--primary);
             line-height: 1.1;
         }
 
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: var(--secondary);
             max-width: 650px;
-            margin: 0 auto 3rem;
+            margin: 0 auto 2.5rem;
             font-weight: 400;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3.5rem;
         }
 
         .btn-primary {
@@ -89,52 +170,131 @@
             padding: 1rem 2.5rem;
             border-radius: 8px;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             transition: var(--transition);
+            border: none;
+            cursor: pointer;
         }
 
         .btn-primary:hover {
             opacity: 0.9;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
 
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface);
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+
+        .formats-bar {
+            background: var(--surface);
+            padding: 1.5rem 2rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .format-item {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .format-item i {
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        /* Features Section */
         section {
-            padding: 4rem 0;
+            padding: 5rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
         }
 
         .section-label {
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--secondary);
-            margin-bottom: 1rem;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
             font-weight: 700;
             display: block;
         }
 
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-header p {
+            color: var(--secondary);
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
         .grid-3 {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
-            margin-top: 2rem;
         }
 
         .feature-card {
             padding: 2.5rem;
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 16px;
             background: var(--surface);
             transition: var(--transition);
+            text-align: left;
         }
 
         .feature-card:hover {
-            border-color: #ddd;
-            transform: translateY(-5px);
+            border-color: var(--primary);
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        .feature-card .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.2rem;
         }
 
         .feature-card h3 {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             margin-bottom: 0.75rem;
             font-weight: 600;
         }
@@ -144,156 +304,390 @@
             color: var(--secondary);
         }
 
-        .feature-icon {
-            font-size: 1.4rem;
-            margin-bottom: 1.2rem;
-            color: var(--primary);
-        }
-
-        .formats-bar {
-            background: var(--surface);
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            gap: 2.5rem;
-            flex-wrap: wrap;
-            margin-top: 3rem;
-        }
-
-        .format-item {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
+        /* How It Works */
         .how-it-works {
-            background: #fafafa;
-            border-radius: 16px;
+            background: var(--surface);
+            border-radius: 20px;
             padding: 4rem;
-            margin: 4rem 0;
+            margin: 0 0 3rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2.5rem;
+            margin-top: 2.5rem;
         }
 
         .step {
-            margin-bottom: 3rem;
-            display: flex;
-            gap: 2rem;
-        }
-
-        .step-num {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--secondary);
-            opacity: 0.5;
-        }
-
-        .step-content h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1.25rem;
-        }
-
-        .step-content p {
-            color: var(--secondary);
-            font-size: 1rem;
-        }
-
-        footer {
-            padding: 4rem 0 2rem;
-            border-top: 1px solid var(--border);
             text-align: center;
+            padding: 1.5rem;
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 auto 1.25rem;
+        }
+
+        .step h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .step p {
+            color: var(--secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            background: var(--bg);
+            padding: 3rem 0;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .tech-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .tech-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .tech-item i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .tech-item span {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            padding: 4rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .cta-section h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-section p {
+            opacity: 0.8;
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            font-size: 1.1rem;
+        }
+
+        .cta-section .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .cta-section .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0 2rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        footer p {
             font-size: 0.9rem;
             color: var(--secondary);
         }
 
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-social a {
+            color: var(--secondary);
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .footer-social a:hover {
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.5rem; }
             .hero p { font-size: 1.1rem; }
+            .hero-actions { flex-direction: column; align-items: center; }
             .how-it-works { padding: 2rem; }
+            .cta-section { padding: 2.5rem 1.5rem; }
+            .cta-section h2 { font-size: 1.8rem; }
+            nav { flex-wrap: wrap; gap: 1rem; justify-content: center; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            footer { flex-direction: column; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2rem; }
+            .formats-bar { gap: 1.5rem; padding: 1rem; }
+            .section-header h2 { font-size: 2rem; }
+            .grid-3 { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Navigation -->
         <nav>
             <a href="#" class="logo">
-                <i class="fa-solid fa-square"></i>
+                <i class="fa-solid fa-brain"></i>
                 <span>Hybrid RAG</span>
             </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#tech-stack">Tech Stack</a>
+                <a href="https://github.com/GZ30eee/hybrid-rag-assistant" target="_blank" class="nav-cta">
+                    <i class="fa-brands fa-github"></i> GitHub
+                </a>
+            </div>
         </nav>
 
         <main>
+            <!-- Hero Section -->
             <section class="hero">
-                <h1>Bridging Document Insights with Web Knowledge.</h1>
-                <p>A sophisticated Retrieval-Augmented Generation (RAG) assistant built for precision, performance, and transparency.</p>
-                <a href="https://hybrid-rag-assistant.streamlit.app/" class="btn-primary" target="_blank">
-                    Launch Application
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>
+                <div class="hero-badge">
+                    <i class="fa-solid fa-robot"></i> v1.0 · Production-Ready RAG
+                </div>
+                <h1>Bridging <span>Document Insights</span> with Web Knowledge</h1>
+                <p>A sophisticated Retrieval-Augmented Generation (RAG) assistant combining BM25 keyword precision with FAISS semantic search, augmented by live web data.</p>
+                
+                <div class="hero-actions">
+                    <a href="https://hybrid-rag-assistant.streamlit.app/" class="btn-primary" target="_blank">
+                        <i class="fa-solid fa-rocket"></i> Launch Application
+                    </a>
+                    <a href="https://github.com/GZ30eee/hybrid-rag-assistant" class="btn-secondary" target="_blank">
+                        <i class="fa-brands fa-github"></i> View on GitHub
+                    </a>
+                </div>
 
                 <div class="formats-bar">
                     <span class="format-item"><i class="fa-regular fa-file-pdf"></i> PDF</span>
                     <span class="format-item"><i class="fa-regular fa-file-word"></i> DOCX</span>
                     <span class="format-item"><i class="fa-regular fa-file-excel"></i> CSV</span>
                     <span class="format-item"><i class="fa-regular fa-file-code"></i> HTML/TXT</span>
+                    <span class="format-item"><i class="fa-solid fa-globe"></i> Web Search</span>
                 </div>
             </section>
 
-            <section>
-                <span class="section-label">Core Capabilities</span>
+            <!-- Features -->
+            <section id="features">
+                <div class="section-header">
+                    <span class="section-label">Core Capabilities</span>
+                    <h2>Why Choose Hybrid RAG?</h2>
+                    <p>Built for precision, transparency, and real-world performance.</p>
+                </div>
                 <div class="grid-3">
                     <div class="feature-card">
-                        <i class="fa-solid fa-layer-group feature-icon"></i>
-                        <h3>Hybrid Retrieval</h3>
-                        <p>Combines keyword precision (BM25) with semantic depth (FAISS) for 2x more accurate context retrieval.</p>
+                        <div class="icon-wrapper">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <h3>Hybrid Retrieval Engine</h3>
+                        <p>Combines BM25 keyword precision with FAISS dense semantic search. Alpha parameter lets you tune the balance for your use case.</p>
                     </div>
                     <div class="feature-card">
-                        <i class="fa-solid fa-cloud-bolt feature-icon"></i>
-                        <h3>Augmented Web Search</h3>
-                        <p>Fills knowledge gaps with live information from the web when your local corpus isn't enough.</p>
+                        <div class="icon-wrapper">
+                            <i class="fa-solid fa-cloud-bolt"></i>
+                        </div>
+                        <h3>Live Web Augmentation</h3>
+                        <p>Automatically integrates web search results when local documents don't have enough information, ensuring up-to-date answers.</p>
                     </div>
                     <div class="feature-card">
-                        <i class="fa-solid fa-file-shield feature-icon"></i>
-                        <h3>Source Verification</h3>
-                        <p>Every response includes direct citations from your documents or web search results.</p>
+                        <div class="icon-wrapper">
+                            <i class="fa-solid fa-file-shield"></i>
+                        </div>
+                        <h3>Source-Verified Answers</h3>
+                        <p>Every response includes direct citations [DOC: filename.pdf] and [WEB: URL], so you can verify the source of each claim.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <h3>Advanced Configuration</h3>
+                        <p>Fine-tune chunk size, overlap, embedding models, LLM temperature, and system prompts for your specific domain.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <h3>Session & History</h3>
+                        <p>Persistent query history with export capabilities. Track your conversations and revisit previous answers.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h3>RAGAS Evaluation Ready</h3>
+                        <p>Built-in evaluation harness using RAGAS to measure retrieval accuracy, context relevancy, and answer faithfulness.</p>
                     </div>
                 </div>
             </section>
 
-            <section class="how-it-works">
-                <span class="section-label">How It Works</span>
-                
-                <div class="step">
-                    <div class="step-num">01</div>
-                    <div class="step-content">
+            <!-- How It Works -->
+            <section id="how-it-works" class="how-it-works">
+                <div class="section-header">
+                    <span class="section-label">Workflow</span>
+                    <h2>How It Works</h2>
+                    <p>Three simple steps from upload to answer.</p>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">01</div>
                         <h3>Ingest & Parse</h3>
-                        <p>Upload your document library—PDF, TXT, or DOCX. The engine extracts clean text and maintains formatting integrity.</p>
+                        <p>Upload your documents (PDF, DOCX, TXT, HTML, CSV). The engine extracts clean text with OCR for scanned PDFs.</p>
                     </div>
-                </div>
-
-                <div class="step">
-                    <div class="step-num">02</div>
-                    <div class="step-content">
+                    <div class="step">
+                        <div class="step-number">02</div>
                         <h3>Hybrid Indexing</h3>
-                        <p>Documents are vectorized for deep semantic understanding and indexed for lightning-fast keyword lookup.</p>
+                        <p>Documents are chunked and dual-indexed via BM25 (keyword) and FAISS (semantic) for fast, accurate retrieval.</p>
                     </div>
-                </div>
-
-                <div class="step">
-                    <div class="step-num">03</div>
-                    <div class="step-content">
+                    <div class="step">
+                        <div class="step-number">03</div>
                         <h3>Query & Synthesize</h3>
-                        <p>The system retrieves the best snippets from both its local store and the live web, synthesizing a concise, referenced answer via Gemini.</p>
+                        <p>The system retrieves the best snippets from both local store and web, then synthesizes a concise, cited answer via Gemini.</p>
                     </div>
                 </div>
+            </section>
+
+            <!-- Tech Stack -->
+            <section id="tech-stack" class="tech-stack">
+                <div class="section-header">
+                    <span class="section-label">Technology</span>
+                    <h2>Built With Modern Tools</h2>
+                    <p>Production-grade stack for reliable performance.</p>
+                </div>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fa-brands fa-google"></i>
+                        <span>Google Gemini</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>FAISS + BM25</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Qdrant (optional)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fa-solid fa-code"></i>
+                        <span>LangChain</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fa-brands fa-python"></i>
+                        <span>Python 3.10+</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fa-solid fa-chart-simple"></i>
+                        <span>RAGAS</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fa-brands fa-docker"></i>
+                        <span>Docker</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fa-solid fa-cloud"></i>
+                        <span>Streamlit</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA -->
+            <section class="cta-section">
+                <h2>Ready to try it?</h2>
+                <p>Upload your documents and start asking questions with live web augmentation.</p>
+                <a href="https://hybrid-rag-assistant.streamlit.app/" class="btn-primary" target="_blank">
+                    <i class="fa-solid fa-play"></i> Launch Demo
+                </a>
             </section>
         </main>
 
+        <!-- Footer -->
         <footer>
-            <p>&copy; 2026 Hybrid RAG Assistant. Built with Streamlit and Google Gemini.</p>
+            <p>&copy; 2026 Hybrid RAG Assistant · MIT License</p>
+            <div class="footer-links">
+                <a href="https://github.com/GZ30eee/hybrid-rag-assistant" target="_blank">GitHub</a>
+                <a href="https://github.com/GZ30eee/hybrid-rag-assistant/issues" target="_blank">Issues</a>
+                <a href="https://github.com/GZ30eee/hybrid-rag-assistant/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a>
+            </div>
+            <div class="footer-social">
+                <a href="https://github.com/GZ30eee" target="_blank" aria-label="GitHub">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+                <a href="https://twitter.com/yourhandle" target="_blank" aria-label="Twitter">
+                    <i class="fa-brands fa-twitter"></i>
+                </a>
+                <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+            </div>
         </footer>
     </div>
 </body>
