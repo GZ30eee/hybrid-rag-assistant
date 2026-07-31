@@ -1,0 +1,10 @@
+[
+    {
+        "question": "What is the capital of France?",
+        "ground_truth": "Paris is the capital of France."
+    },
+    {
+        "question": "Explain the concept of Retrieval-Augmented Generation.",
+        "ground_truth": "Retrieval-Augmented Generation (RAG) is a technique that combines information retrieval with generative language models to produce more accurate and context-aware responses."
+    }
+]
