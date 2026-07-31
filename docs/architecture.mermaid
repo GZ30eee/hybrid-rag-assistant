@@ -1,0 +1,13 @@
+graph TD
+    User[User] --> App[Streamlit App]
+    App --> Upload[Upload Documents]
+    Upload --> Parser[Document Parser]
+    Parser --> Chunker[Chunking]
+    Chunker --> BM25[BM25 Index]
+    Chunker --> FAISS[FAISS Index] --> Retriever[Hybrid Retriever]
+    App --> Query[Query Input]
+    Query --> Retriever
+    Retriever --> WebSearch[Web Search] --> Retriever
+    Retriever --> LLM[LLM Interface]
+    LLM --> Response[Answer + Citations]
+    Response --> App
