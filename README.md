@@ -1,9 +1,28 @@
-# Hybrid RAG Assistant: Document + Web Q&A
+<p align="center">
+  <h1 align="center">Hybrid RAG Assistant</h1>
+  <p align="center">
+    <strong>Hybrid Retrieval-Augmented Generation with Document Search, Semantic Retrieval & Live Web Search</strong>
+    <br /><br />
+    <a href="https://your-streamlit-app.streamlit.app"><strong>🌐 Live Demo</strong></a>
+    ·
+    <a href="https://github.com/GZ30eee/hybrid-rag-assistant/issues"><strong>🐛 Report Bug</strong></a>
+    ·
+    <a href="https://github.com/GZ30eee/hybrid-rag-assistant/discussions"><strong>💬 Discussions</strong></a>
+  </p>
+</p>
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app.streamlit.app) <!-- Replace with actual deployment URL -->
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![CI](https://github.com/GZ30eee/hybrid-rag-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/GZ30eee/hybrid-rag-assistant/actions)
+<p align="center">
+  <img src="https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge" alt="Live Demo" />
+  <img src="https://img.shields.io/github/actions/workflow/status/GZ30eee/hybrid-rag-assistant/ci.yml?style=for-the-badge&label=CI" alt="CI" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge" alt="Python" />
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit" />
+  <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
+  <img src="https://img.shields.io/badge/FAISS-Vector%20Search-6A5ACD?style=for-the-badge" alt="FAISS" />
+  <img src="https://img.shields.io/badge/BM25-Hybrid%20Retrieval-orange?style=for-the-badge" alt="BM25" />
+</p>
+
+---
 
 ## 🏗️ Tech Stack
 
